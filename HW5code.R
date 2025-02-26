@@ -1,7 +1,8 @@
 library(tidyverse)
+library(jsonlite)
 ######## Part 1 ########
 current_filename <- "The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json" 
-json_file <- fromJSON(current_filename)
+json_data <- fromJSON(current_filename)
 file_parts <- str_split_fixed(current.filename, "-", 3) |> 
 str_replace("\\.json$", "")
 artist <- file_parts[1]
@@ -29,7 +30,7 @@ extract_essentia_data <- function(file_path) {
   file_name <- basename(file_path)
   file_parts <- str_split(file_name, "-", simplify = TRUE)
   
-  if (length(file_parts) < 3) return(NULL)  # Handle unexpected file naming
+
   
   artist <- file_parts[1]
   album <- file_parts[2]
@@ -85,18 +86,18 @@ print(essentia_model_output)
 json_files <- list.files(path = "EssentiaOutput/", pattern = "\\.json$", full.names = TRUE)
 
  
-extract_essentia_data <- function(file_path) { #Extracts file name without it's ending
-  file_name <- basename(file_path)
-  file_parts <- str_split(file_name, "-", simplify = TRUE)
+extract_essentia_data <- function(file_path_2) { #Extracts file name without it's ending
+  file_name_2 <- basename(file_path_2)
+  file_parts_2 <- str_split(file_name_2, "-", simplify = TRUE)
   
 
   
-  json_data <- fromJSON(file_path)
+  json_data <- fromJSON(file_path_2)
   
   tibble(
-    artist = file_parts[1],
-    album = file_parts[2],
-    song = str_replace(file_parts[3], ".json$", ""),
+    artist = file_parts_2[1],
+    album = file_parts_2[2],
+    song = str_replace(file_parts_2[3], ".json$", ""),
     overall_loudness = pluck(json_data, "lowlevel", "loudness_ebu128", "integrated", .default = NA),
     spectral_energy = pluck(json_data, "lowlevel", "spectral_energy", .default = NA),
     dissonance = pluck(json_data, "lowlevel", "dissonance", .default = NA),
@@ -109,7 +110,7 @@ extract_essentia_data <- function(file_path) { #Extracts file name without it's 
 }
 
 # Process all JSON files and combine into a single tibble
-essentia_df <- map_dfr(json_files, extract_essentia_data)
+essentia_df_2 <- map_dfr(json_files, extract_essentia_data)
 
 # View the cleaned data
 print(essentia_df)
