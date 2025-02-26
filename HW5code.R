@@ -80,3 +80,36 @@ essentia_model_output <- essentia_model_output |>
 
 # View the cleaned data
 print(essentia_model_output)
+###########################################################
+#Step Four
+json_files <- list.files(path = "EssentiaOutput/", pattern = "\\.json$", full.names = TRUE)
+
+ 
+extract_essentia_data <- function(file_path) { #Extracts file name without it's ending
+  file_name <- basename(file_path)
+  file_parts <- str_split(file_name, "-", simplify = TRUE)
+  
+
+  
+  json_data <- fromJSON(file_path)
+  
+  tibble(
+    artist = file_parts[1],
+    album = file_parts[2],
+    song = str_replace(file_parts[3], ".json$", ""),
+    overall_loudness = pluck(json_data, "lowlevel", "loudness_ebu128", "integrated", .default = NA),
+    spectral_energy = pluck(json_data, "lowlevel", "spectral_energy", .default = NA),
+    dissonance = pluck(json_data, "lowlevel", "dissonance", .default = NA),
+    pitch_salience = pluck(json_data, "lowlevel", "pitch_salience", .default = NA),
+    bpm = pluck(json_data, "rhythm", "bpm", .default = NA),
+    beats_loudness = pluck(json_data, "rhythm", "beats_loudness", .default = NA),
+    danceability = pluck(json_data, "rhythm", "danceability", .default = NA),
+    tuning_frequency = pluck(json_data, "tonal", "tuning_frequency", .default = NA)
+  )
+}
+
+# Process all JSON files and combine into a single tibble
+essentia_df <- map_dfr(json_files, extract_essentia_data)
+
+# View the cleaned data
+print(essentia_df)
