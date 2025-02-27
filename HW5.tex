@@ -78,10 +78,164 @@ runs in the directory as it is set up.
 \begin{knitrout}\scriptsize
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlcom{# Code to run here.}
+\hlkwd{library}\hldef{(tidyverse)}
+\hlkwd{library}\hldef{(jsonlite)}
+\hlcom{######## Part 1 ########}
+\hldef{current_filename} \hlkwb{<-} \hlsng{"The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json"}
+\hldef{json_data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(current_filename)}
+\hldef{file_parts} \hlkwb{<-} \hlkwd{str_split_fixed}\hldef{(current_filename,} \hlsng{"-"}\hldef{,} \hlnum{3}\hldef{) |>}
+\hlkwd{str_replace}\hldef{(}\hlsng{"\textbackslash{}\textbackslash{}.json$"}\hldef{,} \hlsng{""}\hldef{)}
+\hldef{artist} \hlkwb{<-} \hldef{file_parts[}\hlnum{1}\hldef{]}
+\hldef{album} \hlkwb{<-} \hldef{file_parts[}\hlnum{2}\hldef{]}
+\hldef{song} \hlkwb{<-} \hldef{file_parts[}\hlnum{3}\hldef{]}
+\hldef{overall_loudness} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"loudness_ebu128"}\hldef{,} \hlsng{"integrated"}\hldef{)}
+\hldef{spectral_energy} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"spectral_energy"}\hldef{)}
+\hldef{dissonance} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"dissonance"}\hldef{)}
+\hldef{pitch_salience} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"pitch_salience"}\hldef{)}
+\hldef{bpm} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"bpm"}\hldef{)}
+\hldef{beats_loudness} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"beats_loudness"}\hldef{)}
+\hldef{danceability} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"danceability"}\hldef{)}
+\hldef{tuning_frequency} \hlkwb{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"tonal"}\hldef{,} \hlsng{"tuning_frequency"}\hldef{)}
+
+\hlcom{########Part 2########}
+
+\hlkwd{library}\hldef{(tidyverse)}
+\hlkwd{library}\hldef{(jsonlite)}
+
+\hlcom{# Get JSON files}
+\hldef{json_files} \hlkwb{<-} \hlkwd{list.files}\hldef{(}\hlkwc{path} \hldef{=} \hlsng{"EssentiaOutput/"}\hldef{,} \hlkwc{pattern} \hldef{=} \hlsng{"\textbackslash{}\textbackslash{}.json$"}\hldef{,} \hlkwc{full.names} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+\hlcom{# Function to extract data from a single JSON file}
+\hldef{extract_essentia_data} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{file_path}\hldef{) \{}
+  \hldef{file_name} \hlkwb{<-} \hlkwd{basename}\hldef{(file_path)}
+  \hldef{file_parts} \hlkwb{<-} \hlkwd{str_split}\hldef{(file_name,} \hlsng{"-"}\hldef{,} \hlkwc{simplify} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+
+
+  \hldef{artist} \hlkwb{<-} \hldef{file_parts[}\hlnum{1}\hldef{]}
+  \hldef{album} \hlkwb{<-} \hldef{file_parts[}\hlnum{2}\hldef{]}
+  \hldef{song} \hlkwb{<-} \hlkwd{str_replace}\hldef{(file_parts[}\hlnum{3}\hldef{],} \hlsng{".json$"}\hldef{,} \hlsng{""}\hldef{)}
+
+  \hldef{json_data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(file_path)}
+
+  \hlkwd{tibble}\hldef{(}
+    \hlkwc{artist} \hldef{= artist,}
+    \hlkwc{album} \hldef{= album,}
+    \hlkwc{song} \hldef{= song,}
+    \hlkwc{overall_loudness} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"loudness_ebu128"}\hldef{,} \hlsng{"integrated"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{spectral_energy} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"spectral_energy"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{dissonance} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"dissonance"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{pitch_salience} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"pitch_salience"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{bpm} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"bpm"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{beats_loudness} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"beats_loudness"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{danceability} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"danceability"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{tuning_frequency} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"tonal"}\hldef{,} \hlsng{"tuning_frequency"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{)}
+  \hldef{)}
+\hldef{\}}
+
+\hlcom{# Process all JSON files and combine into a single tibble}
+\hldef{essentia_df} \hlkwb{<-} \hlkwd{map_dfr}\hldef{(json_files, extract_essentia_data)}
+
+\hlcom{################################################################################}
+\hlcom{# Step Three}
+\hlcom{################################################################################}
+\hldef{essentia_model_output} \hlkwb{<-} \hlkwd{read_csv}\hldef{(}\hlsng{"EssentiaOutput/EssentiaModelOutput.csv"}\hldef{)}
+
+\hlcom{# Compute averaged columns }
+\hldef{essentia_model_output} \hlkwb{<-} \hldef{essentia_model_output |>}
+  \hlkwd{mutate}\hldef{(}
+    \hlkwc{valence} \hldef{= (deam_valence} \hlopt{+} \hldef{emo_valence} \hlopt{+} \hldef{muse_valence)} \hlopt{/} \hlnum{3}\hldef{,}
+    \hlkwc{arousal} \hldef{= (emo_arousal} \hlopt{+} \hldef{muse_arousal} \hlopt{+} \hldef{deam_arousal)} \hlopt{/} \hlnum{3}\hldef{,}
+    \hlkwc{aggressive} \hldef{= (nn_aggressive} \hlopt{+} \hldef{eff_aggressive)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{happy} \hldef{= (nn_happy} \hlopt{+} \hldef{eff_happy)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{party} \hldef{= (nn_party} \hlopt{+} \hldef{eff_party)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{relaxed} \hldef{= (nn_relax} \hlopt{+} \hldef{eff_relax)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{sad} \hldef{= (nn_sad} \hlopt{+} \hldef{eff_sad)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{acoustic} \hldef{= (nn_acoustic} \hlopt{+} \hldef{eff_acoustic)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{electric} \hldef{= (nn_electronic} \hlopt{+} \hldef{eff_electronic)} \hlopt{/} \hlnum{2}\hldef{,}
+    \hlkwc{instrumental} \hldef{= (nn_instrumental} \hlopt{+} \hldef{eff_instrumental)} \hlopt{/} \hlnum{2}
+  \hldef{)|>}
+  \hlkwd{rename}\hldef{(}\hlkwc{timbreBright} \hldef{= eff_timbre_bright) |>}
+  \hlkwd{select}\hldef{(artist, album, track, valence, arousal, aggressive, happy,}
+         \hldef{party, relaxed, sad, acoustic, electric, instrumental, timbreBright)}
+
+\hlcom{# View the cleaned data}
+\hlkwd{print}\hldef{(essentia_model_output)}
 \end{alltt}
+\begin{verbatim}
+## # A tibble: 181 x 14
+##    artist     album track valence arousal aggressive   happy party relaxed   sad
+##    <chr>      <chr> <chr>   <dbl>   <dbl>      <dbl>   <dbl> <dbl>   <dbl> <dbl>
+##  1 All Get O~ All ~ 06 W~    4.34    4.17      0.554 0.0106  0.979  0.275  0.710
+##  2 All Get O~ All ~ 01 C~    4.60    4.28      0.657 0.00714 0.973  0.350  0.780
+##  3 All Get O~ All ~ 07 T~    3.90    3.80      0.122 0.00713 0.993  0.0286 0.520
+##  4 All Get O~ All ~ 03 W~    4.61    4.36      0.522 0.0114  0.941  0.413  0.689
+##  5 All Get O~ All ~ 02 C~    4.41    4.22      0.528 0.0107  0.985  0.296  0.662
+##  6 All Get O~ All ~ 05 T~    4.52    4.33      0.679 0.00889 0.962  0.435  0.771
+##  7 All Get O~ All ~ 04 L~    4.59    4.33      0.534 0.0126  0.966  0.370  0.764
+##  8 All Get O~ Nobo~ Room~    4.42    4.35      0.428 0.00811 0.976  0.264  0.649
+##  9 All Get O~ Nobo~ Home     4.70    4.38      0.597 0.0103  0.970  0.436  0.791
+## 10 All Get O~ Nobo~ Wait~    4.14    4.01      0.206 0.0112  0.993  0.0689 0.404
+## # i 171 more rows
+## # i 4 more variables: acoustic <dbl>, electric <dbl>, instrumental <dbl>,
+## #   timbreBright <dbl>
+\end{verbatim}
+\begin{alltt}
+\hlcom{###########################################################}
+\hlcom{#Step Four}
+\hldef{json_files} \hlkwb{<-} \hlkwd{list.files}\hldef{(}\hlkwc{path} \hldef{=} \hlsng{"EssentiaOutput/"}\hldef{,} \hlkwc{pattern} \hldef{=} \hlsng{"\textbackslash{}\textbackslash{}.json$"}\hldef{,} \hlkwc{full.names} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+
+\hldef{extract_essentia_data} \hlkwb{<-} \hlkwa{function}\hldef{(}\hlkwc{file_path_2}\hldef{) \{} \hlcom{#Extracts file name without it's ending}
+  \hldef{file_name_2} \hlkwb{<-} \hlkwd{basename}\hldef{(file_path_2)}
+  \hldef{file_parts_2} \hlkwb{<-} \hlkwd{str_split}\hldef{(file_name_2,} \hlsng{"-"}\hldef{,} \hlkwc{simplify} \hldef{=} \hlnum{TRUE}\hldef{)}
+
+
+
+  \hldef{json_data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(file_path_2)}
+
+  \hlkwd{tibble}\hldef{(}
+    \hlkwc{artist} \hldef{= file_parts_2[}\hlnum{1}\hldef{],}
+    \hlkwc{album} \hldef{= file_parts_2[}\hlnum{2}\hldef{],}
+    \hlkwc{song} \hldef{=} \hlkwd{str_replace}\hldef{(file_parts_2[}\hlnum{3}\hldef{],} \hlsng{".json$"}\hldef{,} \hlsng{""}\hldef{),}
+    \hlkwc{overall_loudness} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"loudness_ebu128"}\hldef{,} \hlsng{"integrated"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{spectral_energy} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"spectral_energy"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{dissonance} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"dissonance"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{pitch_salience} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"lowlevel"}\hldef{,} \hlsng{"pitch_salience"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{bpm} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"bpm"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{beats_loudness} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"beats_loudness"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{danceability} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"rhythm"}\hldef{,} \hlsng{"danceability"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{),}
+    \hlkwc{tuning_frequency} \hldef{=} \hlkwd{pluck}\hldef{(json_data,} \hlsng{"tonal"}\hldef{,} \hlsng{"tuning_frequency"}\hldef{,} \hlkwc{.default} \hldef{=} \hlnum{NA}\hldef{)}
+  \hldef{)}
+\hldef{\}}
+
+\hlcom{# Process all JSON files and combine into a single tibble}
+\hldef{essentia_df_2} \hlkwb{<-} \hlkwd{map_dfr}\hldef{(json_files, extract_essentia_data)}
+
+\hlcom{# View the cleaned data}
+\hlkwd{print}\hldef{(essentia_df)}
+\end{alltt}
+\begin{verbatim}
+## # A tibble: 181 x 11
+##    artist album song  overall_loudness spectral_energy dissonance pitch_salience
+##    <chr>  <chr> <chr>            <dbl> <named list>    <named li> <named list>  
+##  1 All G~ All ~ 01 C~            -7.04 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  2 All G~ All ~ 02 C~            -6.47 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  3 All G~ All ~ 03 W~            -6.29 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  4 All G~ All ~ 04 L~            -6.16 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  5 All G~ All ~ 05 T~            -6.73 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  6 All G~ All ~ 06 W~            -7.39 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  7 All G~ All ~ 07 T~            -9.20 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  8 All G~ Move~ All ~            -6.95 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+##  9 All G~ Move~ Bala~            -7.06 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+## 10 All G~ Move~ Move~            -6.52 <dbl [1]>       <dbl [1]>  <dbl [1]>     
+## # i 171 more rows
+## # i 4 more variables: bpm <dbl>, beats_loudness <named list>,
+## #   danceability <dbl>, tuning_frequency <dbl>
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
+
 \end{enumerate}
 \bibliography{bibliography}
 \end{document}
